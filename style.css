@@ -74,6 +74,51 @@ h1 {
   font-weight: 300;
 }
 
+.landing-card {
+  width: 100%;
+  max-width: 760px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: #f9f7f2;
+  padding: 20px;
+  display: grid;
+  gap: 12px;
+}
+
+.landing-card h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.landing-card ol {
+  margin: 0;
+  padding-left: 1.15rem;
+  display: grid;
+  gap: 8px;
+  color: #4d473f;
+  line-height: 1.7;
+}
+
+.start-link {
+  width: fit-content;
+  text-decoration: none;
+  border: 1px solid var(--forest);
+  color: #ffffff;
+  background: var(--forest);
+  padding: 8px 14px;
+  border-radius: 2px;
+  font-size: 0.92rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.start-link:hover,
+.start-link:focus-visible {
+  background: #ffffff;
+  color: var(--forest);
+}
+
 .divider {
   width: 40px;
   height: 1px;
@@ -122,6 +167,10 @@ canvas {
     width: calc(100% - 24px);
     padding: 24px 0 36px;
     gap: 20px;
+  }
+
+  .landing-card {
+    padding: 16px;
   }
 
   #canvas-wrap {
