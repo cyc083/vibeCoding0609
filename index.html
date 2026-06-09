@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>台灣常識手勢快問快答</title>
+    <title>台灣常識快問快答</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
     <script defer src="https://cdn.jsdelivr.net/npm/p5@1.11.10/lib/p5.min.js"></script>
     <script defer src="https://unpkg.com/ml5@1.3.1/dist/ml5.min.js"></script>
@@ -14,16 +14,14 @@
   </head>
   <body>
     <main class="page-shell">
-      <section class="game-card" aria-label="台灣常識手勢快問快答">
+      <section style="width:100%;display:grid;gap:32px;">
         <div class="card-copy">
-          <p class="eyebrow">p5.js + ml5.js + Webcam</p>
-          <h1>台灣常識手勢快問快答</h1>
-          <p>
-            系統會出 10 題台灣常識是非題。張大嘴代表 YES，
-            閉上嘴代表 NO。答對會播放 3 秒特效，答錯就再試一次。
-          </p>
+          <p class="eyebrow">p5.js &nbsp;·&nbsp; ml5.js &nbsp;·&nbsp; FaceMesh</p>
+          <h1>台灣常識<br>快問快答</h1>
+          <div class="divider"></div>
+          <p>系統出 10 題是非題，用嘴巴作答。張大嘴代表 YES，閉上嘴代表 NO。</p>
         </div>
-        <div id="canvas-wrap" aria-label="遊戲畫面：webcam 影像、手部骨架與題目狀態">
+        <div id="canvas-wrap" aria-label="遊戲畫面">
           <p id="game-status" class="sr-only" aria-live="polite">遊戲載入中。</p>
         </div>
       </section>
