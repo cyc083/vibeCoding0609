@@ -3,6 +3,8 @@ const VIDEO_HEIGHT = 720;
 const CORRECT_EFFECT_MS     = 3000;
 const ANSWER_COOLDOWN_MS    = 900;
 const STABLE_FRAMES_REQUIRED = 10;
+const NO_STABLE_FRAMES_REQUIRED = 36;
+const ANSWER_GRACE_MS = 1200;
 
 // 無印色盤
 const C_INK    = [42, 40, 37];
@@ -46,6 +48,7 @@ let score = 0;
 let phase = "answering";
 let lastAnsweredAt   = 0;
 let correctStartedAt = 0;
+let questionStartedAt = 0;
 let feedbackText = "";
 let stableGesture       = null;
 let stableGestureFrames = 0;
@@ -129,6 +132,13 @@ function startFaceDetection() {
 function updateGestureState() {
   if (phase !== "answering") return;
 
+  if (millis() - questionStartedAt < ANSWER_GRACE_MS) {
+    lastDetectedGesture = null;
+    stableGesture = null;
+    stableGestureFrames = 0;
+    return;
+  }
+
   const gesture = detectMouthGesture(faces[0]);
   lastDetectedGesture = gesture;
 
@@ -138,7 +148,8 @@ function updateGestureState() {
   else { stableGesture = gesture; stableGestureFrames = 1; }
 
   const canAnswer = millis() - lastAnsweredAt > ANSWER_COOLDOWN_MS;
-  if (canAnswer && stableGestureFrames >= STABLE_FRAMES_REQUIRED) submitAnswer(gesture);
+  const requiredFrames = gesture === "NO" ? NO_STABLE_FRAMES_REQUIRED : STABLE_FRAMES_REQUIRED;
+  if (canAnswer && stableGestureFrames >= requiredFrames) submitAnswer(gesture);
 }
 
 function detectMouthGesture(face) {
@@ -177,6 +188,7 @@ function submitAnswer(gesture) {
     createParticles();
   } else {
     feedbackText = `答錯了，再試一次。\n提示：${q.fact}`;
+    questionStartedAt = millis();
   }
 }
 
@@ -186,6 +198,7 @@ function advanceQuestion() {
   stableGesture       = null;
   stableGestureFrames = 0;
   lastDetectedGesture = null;
+  questionStartedAt = millis();
   phase = currentQuestion >= questions.length ? "finished" : "answering";
 }
 
@@ -193,7 +206,7 @@ function advanceQuestion() {
 
 function drawTopBar() {
   const isMobile = width < 680;
-  const barH     = isMobile ? 148 : 164;
+  const barH     = isMobile ? 156 : 178;
 
   // 白底半透明面板
   noStroke();
@@ -228,7 +241,7 @@ function drawTopBar() {
   }
 
   const q = questions[currentQuestion];
-  updateDomStatus(`第 ${currentQuestion + 1} 題：${q.text}　${getStatusText()}`);
+  updateDomStatus(`第 ${currentQuestion + 1} 題：${q.text}　請作答。${feedbackText ? feedbackText.replace("\n", " ") : getStatusText()}`);
 
   // 題號（左）、分數（右）
   textStyle(NORMAL);
@@ -240,22 +253,27 @@ function drawTopBar() {
   text(`分數　${score}`, width - 22, 12);
 
   // 題目文字（最顯眼，居中）
+  // text(str, x, y, w) 中 x 是文字框左邊緣，CENTER 決定框內對齊方式
   textAlign(CENTER, TOP);
   fill(...C_INK);
   textStyle(BOLD);
   textSize(isMobile ? 22 : 30);
-  text(q.text, width / 2, isMobile ? 36 : 38, width - 48);
+  text(q.text, 24, isMobile ? 38 : 42, width - 48);
 
   // 狀態提示
-  const hintY = isMobile ? 108 : 122;
+  const hintY = isMobile ? 118 : 135;
   textStyle(NORMAL);
   textSize(isMobile ? 12 : 13);
   if (phase === "correct") {
     fill(...C_FOREST);
     text("答對了，3 秒後進入下一題", width / 2, hintY);
   } else {
+    fill(...C_CLAY);
+    textStyle(BOLD);
+    text("請作答", width / 2, hintY - (isMobile ? 20 : 24));
+    textStyle(NORMAL);
     fill(...C_STONE);
-    text(getStatusText(), width / 2, hintY, width - 60);
+    text(getStatusText(), 30, hintY, width - 60);
   }
 }
 
@@ -263,7 +281,8 @@ function drawTopBar() {
 
 function drawBottomBar() {
   const isMobile = width < 680;
-  const barH = isMobile ? 72 : 80;
+  const hasErrorFeedback = feedbackText && phase !== "correct";
+  const barH = isMobile ? (hasErrorFeedback ? 132 : 72) : 80;
   const barY = height - barH;
 
   // 白底半透明面板
@@ -280,14 +299,21 @@ function drawBottomBar() {
   const chipW   = isMobile ? 126 : 152;
   const chipH   = 38;
   const chipGap = isMobile ? 10 : 14;
-  const chipY   = barY + (barH - chipH) / 2;
+  const chipY   = isMobile && hasErrorFeedback ? barY + 14 : barY + (barH - chipH) / 2;
   const startX  = (width - (chipW * 2 + chipGap)) / 2;
 
   drawChip(startX,             chipY, chipW, chipH, "😮  YES（張嘴）", lastDetectedGesture === "YES", C_FOREST);
   drawChip(startX + chipW + chipGap, chipY, chipW, chipH, "😐  NO（閉嘴）",  lastDetectedGesture === "NO",  C_CLAY);
 
-  // 答錯回饋（右側小字，桌機）
-  if (feedbackText && phase !== "correct" && !isMobile) {
+  // 答錯回饋
+  if (hasErrorFeedback && isMobile) {
+    noStroke();
+    fill(...C_CLAY);
+    textAlign(CENTER, TOP);
+    textStyle(NORMAL);
+    textSize(11);
+    text(feedbackText.replace("\n", " "), 18, barY + 62, width - 36);
+  } else if (hasErrorFeedback) {
     noStroke();
     fill(...C_CLAY);
     textAlign(RIGHT, CENTER);
@@ -471,7 +497,7 @@ function getStatusText() {
   if (!faces.length)            return "把臉放進畫面。張大嘴 → YES　緊閉嘴巴 → NO";
   if (phase === "correct")      return "答對了，3 秒後進入下一題。";
   if (lastDetectedGesture === "YES") return "偵測到張嘴（YES）── 保持一下送出答案";
-  if (lastDetectedGesture === "NO")  return "偵測到閉嘴（NO）── 保持一下送出答案";
+  if (lastDetectedGesture === "NO")  return "偵測到閉嘴（NO）── 請保持久一點，避免誤觸";
   return "已偵測到臉部，請張大嘴（YES）或緊閉嘴巴（NO）。";
 }
 
@@ -491,6 +517,7 @@ function restartGame() {
   currentQuestion     = 0;
   score               = 0;
   phase               = "answering";
+  questionStartedAt   = millis();
   feedbackText        = "";
   particles           = [];
   stableGesture       = null;
