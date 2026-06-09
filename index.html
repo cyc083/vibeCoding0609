@@ -14,21 +14,22 @@
   </head>
   <body>
     <main class="page-shell">
-      <section style="width:100%;display:grid;gap:32px;">
+      <section class="game-shell">
         <div class="card-copy">
-          <p class="eyebrow">p5.js &nbsp;·&nbsp; ml5.js &nbsp;·&nbsp; FaceMesh</p>
+          <p class="eyebrow">p5.js &nbsp;·&nbsp; ml5.js &nbsp;·&nbsp; FaceMesh &nbsp;·&nbsp; Calibration</p>
           <h1>台灣常識<br>快問快答</h1>
           <div class="divider"></div>
-          <p>系統出 10 題是非題，用嘴巴作答。張大嘴代表 YES，閉上嘴代表 NO。</p>
+          <p>先校正你的閉嘴與張嘴幅度，再用嘴巴作答。張大嘴代表 YES，閉上嘴代表 NO，答完會產生成績與錯題報告。</p>
         </div>
 
         <div class="landing-card" aria-label="玩法說明">
           <h2>玩法說明</h2>
           <ol>
             <li>按下開始後，允許瀏覽器使用 webcam。</li>
-            <li>題目顯示後，張大嘴巴代表 YES。</li>
-            <li>閉上嘴巴代表 NO。</li>
-            <li>共 10 題，答對會進下一題，最後顯示總分。</li>
+            <li>依序完成「自然閉嘴」與「張大嘴」各 1 秒校正。</li>
+            <li>題目顯示後，張大嘴巴代表 YES，閉上嘴巴代表 NO。</li>
+            <li>畫面會顯示嘴巴開合值、穩定度與防誤觸狀態。</li>
+            <li>共 10 題，結束後顯示首答分數與錯題複習。</li>
           </ol>
           <a class="start-link" href="#canvas-wrap">開始遊戲</a>
         </div>
